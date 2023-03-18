@@ -171,6 +171,7 @@ contract SupplyChain {
         items[_upc].productNotes = _productNotes;
         items[_upc].itemState = State.Harvested;
         items[_upc].sku = sku;
+        items[_upc].productID = sku + _upc;
         // Increment sku
         sku = sku + 1;
         // Emit the appropriate event
