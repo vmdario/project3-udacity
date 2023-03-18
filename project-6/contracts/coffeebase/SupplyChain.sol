@@ -306,6 +306,10 @@ contract SupplyChain {
         emit Purchased(_upc);
     }
 
+    function addItemHistory(uint _upc, string memory hash) public {
+        itemsHistory[_upc].push(hash);
+    }
+
     // Define a function 'fetchItemBufferOne' that fetches the data
     function fetchItemBufferOne(
         uint _upc
