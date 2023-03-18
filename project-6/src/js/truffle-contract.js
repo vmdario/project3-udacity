@@ -25,7 +25,7 @@ var contract = (function(module) {
     return this.provider.sendAsync.apply(this.provider, arguments);
   };
 
-  var BigNumber = (new Web3()).toBigNumber(0).constructor;
+  // var BigNumber = (new Web3()).toBigNumber(0).constructor;
 
   var Utils = {
     is_object: function(val) {
@@ -255,8 +255,9 @@ var contract = (function(module) {
 
     if (typeof contract == "string") {
       var address = contract;
-      var contract_class = constructor.web3.eth.contract(this.abi);
-      contract = contract_class.at(address);
+      // var contract_class = constructor.web3.eth.contract(this.abi);
+      // contract = contract_class.at(address);
+      contract = new constructor.web3.eth.Contract(this.abi, address);
     }
 
     this.contract = contract;
@@ -271,10 +272,13 @@ var contract = (function(module) {
           this[item.name] = Utils.synchronizeFunction(contract[item.name], this, constructor);
         }
 
-        this[item.name].call = Utils.promisifyFunction(contract[item.name].call, constructor);
-        this[item.name].sendTransaction = Utils.promisifyFunction(contract[item.name].sendTransaction, constructor);
-        this[item.name].request = contract[item.name].request;
-        this[item.name].estimateGas = Utils.promisifyFunction(contract[item.name].estimateGas, constructor);
+        // console.log(contract[item.name])
+        if (contract[item.name]) {
+          this[item.name].call = Utils.promisifyFunction(contract[item.name].call, constructor);
+          this[item.name].sendTransaction = Utils.promisifyFunction(contract[item.name].sendTransaction, constructor);
+          this[item.name].request = contract[item.name].request;
+          this[item.name].estimateGas = Utils.promisifyFunction(contract[item.name].estimateGas, constructor);
+        }
       }
 
       if (item.type == "event") {
@@ -297,9 +301,11 @@ var contract = (function(module) {
       return self.sendTransaction({value: value});
     };
 
-    this.allEvents = contract.allEvents;
-    this.address = contract.address;
+    this.allEvents = contract.events.allEvents;
+    this.address = contract.options.address;
     this.transactionHash = contract.transactionHash;
+    this.methods = contract.methods;
+    this.events = contract.events;
   };
 
   Contract._static_methods = {
@@ -483,7 +489,7 @@ var contract = (function(module) {
           }
         }
 
-        self.web3.version.getNetwork(function(err, result) {
+        self.web3.eth.net.getId(function(err, result) {
           if (err) return reject(err);
 
           var network_id = result.toString();
